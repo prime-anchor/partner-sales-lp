@@ -1,0 +1,1090 @@
+@charset "UTF-8";
+
+/* ============================================================
+   PrimeAnchor LP  /  style.css
+   再構築設計指示書 v1.0（2026-10-27）準拠／2026-10-29 改訂
+   改訂内容：上流設計（WHO/WHAT/HOW）セクションの新設・サービス概要の新設・進め方のアイコン廃止（数字＋罫線へ）・
+            ブラウザ枠／キャプション／課題ラベルの削除・改行ルールの全体統一
+
+   設計方針
+   - モバイルファースト（基本＝スマホ／@media でタブレット・PC）
+   - Professional / Elegant / Minimal / Editorial / Corporate
+   - 余白・整列・タイポグラフィの階層で情報の強弱をつくる
+   - カード・影・グラデーション・装飾は最小限。細い罫線と背景色の交互配置で区切る
+   - 単一アクセント（Navy／Action Blue／Steel Blue）。新色は追加しない
+   - SECTION 05（商談創出の具体例）に最も広い面積と最大のビジュアルを割り当てる
+   - SECTION 04（上流設計）で「パートナーが動く理由を設計する」という訴求の中核を示す
+
+   目次
+   1. デザイントークン
+   2. リセット＆ベース
+   3. 共通パーツ（コンテナ／セクション／見出し／結論／ボタン）
+   4. ヘッダー
+   5. SECTION 01 ファーストビュー
+   6. SECTION 02 課題
+   6b. SECTION 03 サービス概要
+   6c. SECTION 04 上流設計（WHO / WHAT / HOW）
+   7. SECTION 05 商談創出の具体例【最重点】
+   8. SECTION 06 支援範囲・進め方／関連支援
+   9. SECTION 07 お問い合わせ
+  10. フッター
+  11. レスポンシブ（768 / 1024 / 1200 / 〜400 / 〜374）
+============================================================ */
+
+/* ------------------------------------------------------------
+   1. デザイントークン
+------------------------------------------------------------ */
+:root {
+  /* カラー：既存パレットを維持。新規アクセントは追加しない */
+  --navy-deep:  #0B1D3A;
+  --navy:       #102C52;
+  --blue:       #2F619C;
+  --blue-dk:    #204B7B;
+  --steel-blue: #6687A9;
+  --text:       #172943;
+  --muted:      #526579;
+  --surface:    #F3F6FA;
+  --mist-blue:  #E8EFF7;
+  --border:     #D9E2EC;
+  --line-soft:  #E6ECF3;
+  --white:      #FFFFFF;
+
+  /* レイアウト */
+  --container: 1240px;
+  --pad-x: 20px;
+  --gutter: 40px;
+}
+
+/* ------------------------------------------------------------
+   2. リセット＆ベース
+------------------------------------------------------------ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Noto Sans JP", system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--text);
+  background: var(--white);
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;            /* 折り返しは文節の切れ目（<wbr>）のみ */
+  overflow-wrap: break-word;       /* 1文節が行幅を超える場合のみ強制的に折る */
+  line-break: strict;              /* 禁則処理（行頭の小書き文字・長音など）を厳格に */
+  overflow-x: hidden;         /* 端末差による微小な横スクロールを抑止 */
+}
+
+img { max-width: 100%; height: auto; display: block; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+dl, dd { margin: 0; }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3, h4, p, figure, blockquote { margin: 0; }
+
+/* 行の収まり：見出し・結論は均等に、本文は孤立行を避ける */
+h1, h2, h3, .closing__text, .section__lead { text-wrap: balance; }
+p, li, dd { text-wrap: pretty; }
+
+/* 見出しは日本語の字間を詰めて引き締める */
+h1, h2, h3, .kicker, .step__num, .case__num, .capability__num {
+  font-feature-settings: "palt" 1;
+}
+
+:where(section) { scroll-margin-top: 68px; }
+
+::selection { background: var(--mist-blue); color: var(--navy-deep); }
+
+:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 200;
+  background: var(--navy);
+  color: var(--white);
+  padding: 10px 18px;
+  font-size: 14px;
+}
+.skip-link:focus { left: 0; }
+
+/* 中黒（・）を含む文節は途中で折らない（HTML側で .nw を付与） */
+.nw { white-space: nowrap; }
+
+/* 意味の切れ目での改行（タブレット以上でのみ有効。スマホは文節で自然に折り返す） */
+.br-pc { display: none; }
+/* 小型PC（1024px〜）でのみ有効な改行（行が長い箇所用） */
+.br-lg { display: none; }
+
+/* ------------------------------------------------------------
+   3. 共通パーツ
+------------------------------------------------------------ */
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--pad-x);
+}
+
+.section { padding-block: 76px; }
+.section--tight { padding-block: 68px; }
+.section--surface { background: var(--surface); }
+.section--navy { background: var(--navy); color: var(--white); }
+.section--examples { background: var(--white); }
+
+/* --- 見出しブロック --- */
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.6;
+  letter-spacing: .14em;
+  color: var(--steel-blue);
+}
+.kicker::before {
+  content: "";
+  flex: none;
+  width: 26px;
+  height: 1px;
+  background: currentColor;
+}
+.kicker--light { color: #9FB6D8; }
+
+.section__title {
+  font-size: 25px;
+  line-height: 1.5;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: .005em;
+}
+.section__title--light { color: var(--white); }
+
+.section__lead {
+  margin-top: 20px;
+  max-width: 44em;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.95;
+}
+.section__subhook {
+  margin-top: 16px;
+  max-width: 44em;
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--muted);
+}
+
+/* --- 結論コピー：細い上罫線と余白だけで結論として読ませる --- */
+.closing {
+  margin-top: 60px;
+  padding-top: 36px;
+  border-top: 1px solid var(--border);
+}
+.closing__text {
+  max-width: 34em;
+  color: var(--navy);
+  font-size: 19px;
+  line-height: 1.85;
+  font-weight: 500;
+  letter-spacing: .005em;
+}
+
+/* --- ボタン --- */
+.btn {
+  display: inline-block;
+  background: var(--blue);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: center;
+  padding: 15px 28px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.btn:hover { background: var(--blue-dk); }
+.btn--sm { padding: 9px 18px; font-size: 13px; }
+.btn--lg { padding: 17px 32px; font-size: 16px; }
+.btn--block { display: block; width: 100%; min-height: 54px; }
+.btn--onhero { background: var(--white); color: var(--navy); }
+.btn--onhero:hover { background: var(--mist-blue); color: var(--navy-deep); }
+
+/* ------------------------------------------------------------
+   4. ヘッダー
+------------------------------------------------------------ */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, .93);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+.header__logo img { width: 132px; height: auto; }
+.header__right { display: flex; align-items: center; gap: 24px; }
+.gnav { display: none; }      /* SP：ロゴ＋CTAを優先 */
+
+/* ------------------------------------------------------------
+   5. SECTION 01｜ファーストビュー
+------------------------------------------------------------ */
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 0;
+  padding-top: 76px;
+  padding-bottom: 64px;
+  color: var(--white);
+  overflow: hidden;
+  background-color: var(--navy-deep);                   /* 画像未読込時のフォールバック */
+  background-image: url("../img/hero-bg-primeanchor.webp");
+  background-size: cover;
+  background-position: 72% center;
+}
+/* 背景の明るい側でも白文字の可読性を落とさないためのオーバーレイ */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(104deg,
+    rgba(11, 29, 58, .94) 0%,
+    rgba(11, 29, 58, .86) 44%,
+    rgba(16, 44, 82, .62) 78%,
+    rgba(16, 44, 82, .44) 100%);
+}
+.hero__inner { position: relative; z-index: 1; }
+.hero__copy { max-width: 880px; }
+
+/* サービスワード：H1より十分に小さく、装飾なしの自然なテキスト表記 */
+.hero__kicker {
+  margin: 0 0 18px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: .04em;
+  color: rgba(255, 255, 255, .82);
+}
+
+.hero__title {
+  font-size: 31px;
+  line-height: 1.38;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: .005em;
+}
+.hero__sub {
+  margin-top: 24px;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.85;
+  color: var(--white);
+}
+.hero__desc {
+  margin-top: 12px;
+  max-width: 40em;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.95;
+  color: rgba(255, 255, 255, .88);
+}
+.hero__cta { margin-top: 36px; min-width: 280px; max-width: 100%; }
+
+/* ------------------------------------------------------------
+   6. SECTION 02｜課題（カードUIではなく編集的な3カラム）
+------------------------------------------------------------ */
+.issues { margin-top: 52px; display: grid; }
+.issue {
+  border-top: 1px solid var(--border);
+  padding-top: 22px;
+}
+.issue + .issue { margin-top: 30px; }
+
+.issue__title {
+  margin-top: 0;
+  font-size: 20px;
+  line-height: 1.65;
+  font-weight: 700;
+  color: var(--navy);
+}
+.issue__text {
+  margin-top: 14px;
+  font-size: 16px;
+  line-height: 1.95;
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------------
+   6b. SECTION 03｜サービス概要
+   「PrimeAnchorとは何か」を定義する。見出しは一文の言い切り、
+   詳細は罫線で区切った定義リスト（対象／提供内容）。
+------------------------------------------------------------ */
+.section__title--statement {
+  font-size: 21px;
+  line-height: 1.6;
+  max-width: none;
+}
+
+.spec {
+  margin-top: 40px;
+  border-top: 1px solid var(--border);
+}
+.spec__row {
+  padding-block: 22px;
+  border-bottom: 1px solid var(--border);
+}
+.spec__row dt {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.6;
+  letter-spacing: .12em;
+  color: var(--blue);
+}
+.spec__row dd { margin-top: 6px; }
+.spec__row dd p {
+  font-size: 16px;
+  line-height: 1.95;
+  color: var(--text);
+}
+.spec__row dd .spec__sub {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--muted);
+}
+
+
+/* ------------------------------------------------------------
+   6c. SECTION 03｜サービスの特長（01/02/03 能力）
+   「PrimeAnchorが何をどこまでやるか」を3つの能力で示す主役セクション。
+   番号＋短いラベル＋フル見出し＋本文。PC 3列、subgrid で行位置を揃える。
+------------------------------------------------------------ */
+.capabilities {
+  margin-top: 52px;
+  display: grid;
+  border-top: 1px solid var(--border);
+}
+.capability {
+  padding-block: 28px;
+  border-bottom: 1px solid var(--border);
+}
+.capability__meta {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.capability__num {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  line-height: 1.5;
+  color: var(--blue);
+}
+.capability__label {
+  position: relative;
+  padding-left: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  line-height: 1.5;
+  color: var(--navy);
+}
+.capability__label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .55em;
+  width: 8px;
+  height: 1px;
+  background: var(--steel-blue);
+}
+.capability__title {
+  margin-top: 14px;
+  font-size: 20px;
+  line-height: 1.6;
+  font-weight: 700;
+  color: var(--navy);
+}
+.capability__text {
+  margin-top: 12px;
+  max-width: 36em;
+  font-size: 16px;
+  line-height: 1.95;
+  color: var(--muted);
+}
+/* ------------------------------------------------------------
+   7. SECTION 05｜商談創出の具体例【最重点】
+   制作イメージを主役として大きく見せる。比較図・追加カード・キャプションは置かない。
+------------------------------------------------------------ */
+.case {
+  margin-top: 56px;
+  padding-top: 40px;
+  border-top: 1px solid var(--border);
+}
+.case + .case { margin-top: 64px; padding-top: 56px; }
+
+.case__grid {
+  display: grid;
+  gap: 32px;
+  align-items: center;
+}
+.case__copy, .case__visual { min-width: 0; }
+
+.case__meta {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.case__num {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  line-height: 1.5;
+  color: var(--blue);
+}
+.case__type {
+  position: relative;
+  padding-left: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  line-height: 1.5;
+  color: var(--navy);
+}
+.case__type::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .55em;
+  width: 8px;
+  height: 1px;
+  background: var(--steel-blue);
+}
+
+.case__title {
+  margin-top: 16px;
+  font-size: 22px;
+  line-height: 1.55;
+  font-weight: 700;
+  color: var(--navy);
+}
+.case__text {
+  margin-top: 16px;
+  font-size: 16px;
+  line-height: 1.95;
+  color: var(--muted);
+}
+.case__text + .case__text { margin-top: 12px; }
+
+.case__outputs {
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line-soft);
+}
+.case__outputs-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  line-height: 1.6;
+  color: var(--steel-blue);
+}
+.case__list { margin-top: 12px; display: grid; gap: 7px; }
+.case__list li {
+  position: relative;
+  padding-left: 16px;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--text);
+}
+.case__list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .85em;
+  width: 8px;
+  height: 1px;
+  background: var(--blue);
+}
+
+/* --- 制作イメージ（主役ビジュアル） --- */
+.case__visual { margin: 0; }
+
+.shot { position: relative; }
+/* 資料・Webとも同じ見せ方：細い罫線と極薄の影のみ */
+.shot img {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 10px 28px rgba(16, 44, 82, .10);
+}
+
+
+
+/* ------------------------------------------------------------
+   8. SECTION 06｜支援範囲・進め方／関連支援
+------------------------------------------------------------ */
+/* 工程は「数字＋罫線」で示す（アイコン・矢印なし）。
+   スマホ：左に数字／右に見出しと本文。 */
+.steps {
+  margin-top: 56px;
+  display: grid;
+  border-top: 1px solid var(--border);
+}
+.step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  column-gap: 16px;
+  padding-block: 28px;
+  border-bottom: 1px solid var(--border);
+}
+.step__num {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: .04em;
+  color: var(--blue);
+}
+.step__title {
+  grid-column: 2;
+  grid-row: 1;
+  font-size: 20px;
+  line-height: 1.6;
+  font-weight: 700;
+  color: var(--navy);
+}
+.step__text {
+  grid-column: 2;
+  grid-row: 2;
+  margin-top: 12px;
+  font-size: 16px;
+  line-height: 1.95;
+  color: var(--muted);
+}
+
+
+/* ------------------------------------------------------------
+   8b. SECTION 06｜その他の支援メニュー
+   「施策企画・制作代行」の説明が完結したあとに、別の支援メニューも利用できることを紹介する独立セクション。
+   3つのメニューを同格に扱い、PCは横3列・SPは縦並び。
+   細い上罫線＋サービス名＋説明文というエディトリアルな構造で、既存のタイポグラフィ思想を継承する。
+------------------------------------------------------------ */
+
+/* 本セクションのH2は、主力の訴求（SECTION 02〜05）より控えめな階層とし、
+   「別の支援メニューの紹介」であることが分かる情報階層にする */
+.section__title--others {
+  font-size: 22px;
+  line-height: 1.55;
+}
+.section__head--others .section__lead { max-width: 48em; }
+
+.menus {
+  margin-top: 40px;
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--border);
+}
+.menu {
+  padding-block: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.menu__title {
+  margin-top: 0;
+  font-size: 18px;
+  line-height: 1.6;
+  font-weight: 700;
+  color: var(--navy);
+}
+.menu__text {
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--muted);
+}
+
+.menus__note {
+  margin-top: 20px;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--steel-blue);
+}
+
+/* ------------------------------------------------------------
+   9. SECTION 07｜お問い合わせ
+------------------------------------------------------------ */
+.contact { display: grid; gap: 40px; }
+.contact__title { font-size: 25px; }
+.contact__text {
+  margin-top: 18px;
+  max-width: 30em;
+  font-size: 16px;
+  line-height: 1.95;
+  color: #C6D5E8;
+}
+.contact__text + .contact__text { margin-top: 10px; }
+.contact__note {
+  margin-top: 16px;
+  font-size: 14px;
+  line-height: 1.85;
+  color: #9FB6D8;
+}
+
+.form {
+  background: var(--white);
+  border-radius: 8px;
+  padding: 28px 20px;
+  color: var(--text);
+}
+.form__row { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+.form__row label {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--navy);
+}
+.form input, .form select, .form textarea {
+  width: 100%;
+  font-family: inherit;
+  font-size: 16px;            /* iOS の自動ズーム防止のため 16px を維持 */
+  line-height: 1.6;
+  color: var(--text);
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--white);
+  min-height: 48px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.form input:hover, .form select:hover, .form textarea:hover { border-color: var(--steel-blue); }
+.form input:focus, .form select:focus, .form textarea:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(47, 97, 156, .18);
+}
+.form select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%23526579' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 12px auto;
+}
+.form textarea { resize: vertical; min-height: 132px; }
+
+.form__req {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: #B5452F;
+  margin-left: 6px;
+}
+.form__opt {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--steel-blue);
+  margin-left: 6px;
+}
+
+.form__check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 4px 0 22px;
+}
+.form__check input {
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  margin-top: 6px;
+  flex-shrink: 0;
+  accent-color: var(--blue);
+}
+.form__check label {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.8;
+  color: var(--text);
+}
+
+.form__status {
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #B5452F;
+}
+
+/* ------------------------------------------------------------
+   10. フッター
+------------------------------------------------------------ */
+.footer {
+  background: var(--navy-deep);
+  color: #C6D5E8;
+  padding: 52px 0 22px;
+}
+.footer__inner { display: flex; flex-direction: column; gap: 28px; }
+.footer__logo {
+  width: 140px;
+  height: auto;
+  filter: brightness(0) invert(1);
+  opacity: .95;
+}
+.footer__tagline { margin-top: 14px; font-size: 13px; line-height: 1.85; }
+.footer__company { font-weight: 700; font-size: 14px; color: var(--white); }
+.footer__links {
+  margin-top: 12px;
+  display: flex;
+  gap: 20px;
+  font-size: 13px;
+  color: #9FB6D8;
+}
+.footer__copyright {
+  max-width: var(--container);
+  margin: 32px auto 0;
+  padding: 18px var(--pad-x) 0;
+  border-top: 1px solid rgba(255, 255, 255, .14);
+  font-size: 12px;
+  color: #7D96B6;
+}
+
+/* ============================================================
+   11-1. タブレット以上（768px〜）
+============================================================ */
+@media (min-width: 768px) {
+  :root { --pad-x: 32px; }
+
+  body { font-size: 16px; }
+  :where(section) { scroll-margin-top: 76px; }
+
+  .br-pc { display: inline; }
+
+  .section { padding-block: 100px; }
+  .section--tight { padding-block: 88px; }
+
+  .section__title { font-size: 33px; line-height: 1.46; }
+  .section__title--statement { font-size: 26px; line-height: 1.6; }
+  .section__lead { margin-top: 24px; font-size: 17px; }
+  .section__subhook { margin-top: 18px; font-size: 16px; }
+
+  /* 結論コピー：中央に置き、セクションの締めとして読ませる */
+  .closing {
+    margin-top: 72px;
+    padding-top: 44px;
+    max-width: 900px;
+    margin-inline: auto;
+  }
+  .closing__text {
+    font-size: 22px;
+    max-width: none;
+    text-align: center;
+  }
+
+  /* ヘッダー */
+  .header__inner { height: 72px; }
+  .header__logo img { width: 158px; }
+  .header__right { gap: 32px; }
+  .gnav { display: block; }
+  .gnav__list { display: flex; gap: 26px; }
+  .gnav__list a {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    transition: color .2s ease;
+  }
+  .gnav__list a:hover { color: var(--blue); }
+
+  /* ファーストビュー */
+  .hero { min-height: 660px; padding-block: 100px; background-position: center right; }
+  .hero__cta { min-width: 220px; }
+  .hero::before {
+    background: linear-gradient(94deg,
+      rgba(11, 29, 58, .93) 0%,
+      rgba(11, 29, 58, .80) 38%,
+      rgba(16, 44, 82, .46) 68%,
+      rgba(16, 44, 82, .20) 100%);
+  }
+  .hero__title { font-size: 46px; line-height: 1.28; }
+  .hero__sub { margin-top: 28px; font-size: 19px; }
+  .hero__desc { margin-top: 14px; font-size: 16px; }
+
+  /* サービス概要：左に項目名／右に内容 */
+  .spec { margin-top: 48px; }
+  .spec__row {
+    display: grid;
+    grid-template-columns: minmax(0, 20fr) minmax(0, 80fr);
+    column-gap: var(--gutter);
+    align-items: baseline;
+    padding-block: 30px;
+  }
+  .spec__row dt { font-size: 15px; }
+  .spec__row dd { margin-top: 0; }
+  .spec__row dd p { font-size: 17px; }
+  .spec__row dd .spec__sub { font-size: 15px; }
+
+  /* サービスの特長：タブレットは縦積み */
+  .capabilities { margin-top: 64px; }
+  .capability { padding-block: 32px; }
+  .capability__title { font-size: 22px; }
+  .capability__text { font-size: 17px; }
+
+  /* 課題：タブレットは2カラム */
+  .issues {
+    margin-top: 64px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: 36px;
+  }
+  .issue + .issue { margin-top: 0; }
+
+  /* SECTION 05 */
+  .case { margin-top: 64px; padding-top: 48px; }
+  .case + .case { margin-top: 76px; padding-top: 64px; }
+  .case__title { font-size: 27px; }
+  .case__text { font-size: 17px; }
+
+  /* 進め方：3カラム（コンパクト）。罫線＋起点の短線。
+     subgrid で数字・見出し・本文の行位置を3列で揃える */
+  .steps {
+    margin-top: 48px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: auto auto auto;
+    column-gap: var(--gutter);
+    border-bottom: none;
+  }
+  .step {
+    grid-template-columns: none;
+    grid-template-rows: subgrid;
+    grid-row: span 3;
+    row-gap: 0;
+    padding-block: 0;
+    padding-top: 24px;
+    border-bottom: none;
+  }
+  .step::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: -2px;
+    width: 40px;
+    height: 3px;
+    background: var(--navy);
+  }
+  .step__num {
+    grid-column: auto;
+    grid-row: auto;
+    font-size: 32px;
+    line-height: 1;
+    margin-bottom: 14px;
+  }
+  .step__title { grid-column: auto; grid-row: auto; }
+  .step__text  { grid-column: auto; grid-row: auto; margin-top: 10px; }
+
+  /* SECTION 06｜その他の支援メニュー */
+  .section__title--others { font-size: 26px; line-height: 1.55; }
+
+  .menus {
+    margin-top: 52px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    border-bottom: none;
+  }
+  .menu {
+    position: relative;
+    padding-block: 0;
+    padding-top: 26px;
+    border-top: 1px solid var(--border);
+    border-bottom: none;
+  }
+  .menu__title { font-size: 19px; }
+  .menu__text { font-size: 15px; }
+
+  .menus__note { margin-top: 32px; }
+
+  /* お問い合わせ：タブレットは縦積み（幅を絞って可読性を確保） */
+  .contact { gap: 44px; }
+  .contact__intro { max-width: 680px; }
+  .contact__title { font-size: 32px; }
+  .form { max-width: 620px; padding: 36px 32px; }
+
+  /* フッター */
+  .footer__inner { flex-direction: row; justify-content: space-between; align-items: flex-start; }
+  .footer__meta { text-align: right; }
+  .footer__links { justify-content: flex-end; }
+}
+
+/* ============================================================
+   11-2. 小型PC（1024px〜）
+============================================================ */
+@media (min-width: 1024px) {
+  .section { padding-block: 120px; }
+  .section--tight { padding-block: 104px; }
+
+  .section__title { font-size: 38px; line-height: 1.44; max-width: 20em; }
+  .section__title--statement { font-size: 32px; line-height: 1.55; max-width: none; }
+  .br-lg { display: inline; }
+  .section__lead { margin-top: 26px; font-size: 18px; max-width: none; }
+  .section__subhook { margin-top: 20px; font-size: 16px; max-width: none; }
+
+  .closing { margin-top: 80px; padding-top: 48px; }
+  .closing__text { font-size: 24px; }
+
+  .hero__title { font-size: 54px; line-height: 1.26; }
+  .hero__sub { font-size: 20px; }
+  .hero__desc { font-size: 17px; max-width: 42em; }
+  .hero__cta { margin-top: 38px; }
+
+  /* サービスの特長：3カラム。罫線＋起点の短線。
+     subgrid でメタ・見出し・本文の行位置を3列で揃える */
+  .capabilities {
+    margin-top: 72px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: auto auto auto;
+    column-gap: 48px;
+    border-bottom: none;
+  }
+  .capability {
+    position: relative;
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: span 3;
+    padding-block: 0;
+    padding-top: 36px;
+    border-bottom: none;
+  }
+  .capability::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: -2px;
+    width: 40px;
+    height: 3px;
+    background: var(--navy);
+  }
+  .capability__title { font-size: 23px; }
+  .capability__text { max-width: none; }
+
+  /* サービス概要：本文を一段大きく */
+  .spec__row dd p { font-size: 18px; }
+  .spec__row dd .spec__sub { font-size: 16px; }
+
+  /* 課題：編集的な3カラム */
+  .issues { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .issue { padding-top: 24px; }
+  .issue__title { font-size: 21px; }
+
+  /* SECTION 05：コピー42／制作イメージ58の2カラム（交互配置） */
+  .case { margin-top: 76px; padding-top: 60px; }
+  .case + .case { margin-top: 96px; padding-top: 80px; }
+  /* 制作イメージの上端とコピーの先頭を揃える */
+  .case__grid {
+    grid-template-columns: minmax(0, 40fr) minmax(0, 60fr);
+    grid-template-areas: "copy visual";
+    column-gap: clamp(40px, 4.6vw, 72px);
+    align-items: start;
+  }
+  .case__copy  { grid-area: copy; }
+  .case__visual { grid-area: visual; }
+  .case--reverse .case__grid {
+    grid-template-columns: minmax(0, 60fr) minmax(0, 40fr);
+    grid-template-areas: "visual copy";
+  }
+  .case__title { font-size: 27px; }
+  .case__list li { font-size: 16px; }
+
+  /* 進め方（コンパクト） */
+  .steps { margin-top: 56px; column-gap: 48px; }
+  .step__num { font-size: 36px; }
+  .step__title { font-size: 20px; }
+  .step__text { font-size: 16px; }
+
+  /* SECTION 06｜大型PCでの余白と見出し */
+  .section__title--others { font-size: 28px; }
+  .menus { margin-top: 60px; column-gap: 48px; }
+  .menu { padding-top: 32px; }
+  .menu__title { font-size: 20px; }
+  .menu__text { font-size: 16px; }
+
+  /* お問い合わせ：左メッセージ／右フォーム */
+  .contact {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 480px);
+    gap: 72px;
+    align-items: center;
+  }
+  .contact__intro { max-width: none; }
+  .contact__title { font-size: 36px; line-height: 1.44; }
+  .contact__text { font-size: 17px; }
+  .contact__note { font-size: 15px; }
+  .form { max-width: none; width: 100%; padding: 40px 36px; }
+}
+
+/* ============================================================
+   11-3. 大型PC（1200px〜）
+============================================================ */
+@media (min-width: 1200px) {
+  .section__title { font-size: 40px; }
+  .section__title--statement { font-size: 34px; }
+  .closing__text { font-size: 25px; }
+  .contact { gap: 88px; }
+  .contact__title { font-size: 38px; }
+  .case__title { font-size: 30px; }
+
+  /* 具体例：大画面では画像をさらに大きく */
+  .case__grid {
+    grid-template-columns: minmax(0, 36fr) minmax(0, 64fr);
+  }
+  .case--reverse .case__grid {
+    grid-template-columns: minmax(0, 64fr) minmax(0, 36fr);
+  }
+}
+
+/* ============================================================
+   11-4. 小型・標準スマートフォン（〜400px）
+============================================================ */
+@media (max-width: 400px) {
+  .hero__title { font-size: 27px; }
+  .hero__sub { font-size: 15px; }
+  .hero__cta { font-size: 14px; padding-inline: 18px; }
+  .section__title { font-size: 23px; }
+  .section__title--statement { font-size: 20px; }
+  .case__title { font-size: 20px; }
+}
+
+/* ============================================================
+   11-4b. 極小幅（〜374px：360px端末など）
+   H1の1行目（12字）が折れないよう、字サイズだけ微調整
+============================================================ */
+@media (max-width: 374px) {
+  .hero__title { font-size: 25px; }
+}
+
+/* ============================================================
+   11-5. 動きの抑制設定
+============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition-duration: .01ms !important; }
+}
